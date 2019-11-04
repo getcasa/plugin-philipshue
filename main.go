@@ -149,6 +149,7 @@ type state struct {
 
 // Params define actions parameters available
 type Params struct {
+	ID  string
 	On  bool
 	Sat int
 	Bri int
@@ -179,7 +180,14 @@ func OnStart(config []byte) {
 		panic(err)
 	}
 
-	fmt.Println(bridges)
+	for _, bridge := range bridges {
+		for _, light := range bridge.getLights() {
+			states = append(states, state{
+				Bridge: bridge,
+				Device: light,
+			})
+		}
+	}
 }
 
 // CallAction call functions from actions
