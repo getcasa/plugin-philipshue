@@ -12,7 +12,7 @@ import (
 func main() {}
 
 var Config = sdk.Configuration{
-	Name:        "philips hue",
+	Name:        "philipshue",
 	Version:     "1.0.0",
 	Author:      "casa",
 	Description: "Control Philips Hue ecosystem",
@@ -119,7 +119,7 @@ type Params struct {
 }
 
 // CallAction call functions from actions
-func CallAction(name string, params []byte) {
+func CallAction(name string, params []byte, config []byte) {
 	if string(params) == "" {
 		fmt.Println("Params must be provided")
 		return
