@@ -49,6 +49,7 @@ var Config = sdk.Configuration{
 	},
 }
 
+// State define each element of the global state
 type State struct {
 	Bridge   Bridge
 	Device   devices.LCT0152A19ECLv5
@@ -60,6 +61,7 @@ type savedConfig struct {
 	Username string
 }
 
+// States is the global state of plugin
 var States []State
 var client http.Client
 
