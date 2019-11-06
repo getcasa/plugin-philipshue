@@ -49,9 +49,62 @@ var Config = sdk.Configuration{
 	},
 }
 
-type state struct {
-	Bridge Bridge
-	Device devices.LCT0152A19ECLv5
+type State struct {
+	Bridge   Bridge
+	Device   devices.LCT0152A19ECLv5
+	DeviceID int
+}
+
+type savedConfig struct {
+	BridgeID string
+	Username string
+}
+
+var States []State
+var client http.Client
+
+// Init plugin config
+func Init() []byte {
+	bridges := DiscoverBridges()
+	var savedConfigs []savedConfig
+
+	for _, bridge := range bridges {
+		savedConfigs = append(savedConfigs, savedConfig{
+			BridgeID: bridge.ID,
+			Username: bridge.CreateUser(),
+		})
+	}
+
+	config, _ := json.Marshal(savedConfigs)
+
+	return config
+}
+
+// OnStart create http client
+func OnStart(config []byte) {
+	var savedConfigs []savedConfig
+
+	if err := json.Unmarshal(config, &savedConfigs); err != nil {
+		panic(err)
+	}
+
+	bridges := DiscoverBridges()
+
+	for _, savedConfig := range savedConfigs {
+		for i, bridge := range bridges {
+			if savedConfig.BridgeID != bridge.ID {
+				continue
+			}
+			bridges[i].Username = savedConfig.Username
+			for j, light := range bridge.GetLights() {
+				States = append(States, State{
+					Bridge:   bridges[i],
+					Device:   light,
+					DeviceID: j + 1,
+				})
+			}
+		}
+	}
 }
 
 // Params define actions parameters available
@@ -61,40 +114,6 @@ type Params struct {
 	Sat int
 	Bri int
 	Hue int
-}
-
-var states []state
-var client http.Client
-
-// Init plugin config
-func Init() []byte {
-	bridges := Discover()
-
-	for i, bridge := range bridges {
-		bridges[i].Username = bridge.CreateUser()
-	}
-
-	config, _ := json.Marshal(bridges)
-
-	return config
-}
-
-// OnStart create http client
-func OnStart(config []byte) {
-	var bridges []Bridge
-
-	if err := json.Unmarshal(config, &bridges); err != nil {
-		panic(err)
-	}
-
-	for _, bridge := range bridges {
-		for _, light := range bridge.getLights() {
-			states = append(states, state{
-				Bridge: bridge,
-				Device: light,
-			})
-		}
-	}
 }
 
 // CallAction call functions from actions
@@ -116,7 +135,11 @@ func CallAction(name string, params []byte) {
 	// use name to call actions
 	switch name {
 	case "switchLight":
-		// TODO: add call
+		bridge := GetBridge(req.ID)
+		if bridge.ID == "" {
+			return
+		}
+		bridge.SwitchLight(req)
 	default:
 		return
 	}

@@ -18,8 +18,8 @@ type Bridge struct {
 	Username          string
 }
 
-// Discover list all bridge on local network
-func Discover() []Bridge {
+// DiscoverBridges list all bridge on local network
+func DiscoverBridges() []Bridge {
 	res, err := http.Get("https://discovery.meethue.com/")
 	if err != nil {
 		fmt.Println(err)
@@ -77,7 +77,8 @@ func (bridge *Bridge) CreateUser() string {
 	return responses[0].Success.Username
 }
 
-func (bridge *Bridge) getLights() []devices.LCT0152A19ECLv5 {
+// GetLights list all lights from bridge
+func (bridge *Bridge) GetLights() []devices.LCT0152A19ECLv5 {
 	res, err := http.Get("http://" + bridge.InternalIPAddress + "/api/" + bridge.Username + "/lights")
 	if err != nil {
 		fmt.Println(err)
@@ -87,7 +88,6 @@ func (bridge *Bridge) getLights() []devices.LCT0152A19ECLv5 {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
 	}
 
 	var result map[string]devices.LCT0152A19ECLv5
@@ -99,4 +99,54 @@ func (bridge *Bridge) getLights() []devices.LCT0152A19ECLv5 {
 	}
 
 	return lights
+}
+
+// SwitchLight send user params to the light
+func (bridge *Bridge) SwitchLight(params Params) {
+	byteParams, err := json.Marshal(params)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	id := GetLightID(params.ID)
+	if id == -1 {
+		fmt.Println("Wrong id")
+		return
+	}
+
+	params.ID = strconv.Itoa(id)
+
+	req, err := http.NewRequest(http.MethodPut, "http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+params.ID, bytes.NewBuffer(byteParams))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
+}
+
+// GetLightID return int id of the light
+func GetLightID(uid string) int {
+	for _, state := range States {
+		if state.Device.UniqueID == uid {
+			return state.DeviceID
+		}
+	}
+	return -1
+}
+
+// GetBridge return the bridge of the light
+func GetBridge(uid string) Bridge {
+	for _, state := range States {
+		if state.Device.UniqueID == uid {
+			return state.Bridge
+		}
+	}
+	return Bridge{}
 }
