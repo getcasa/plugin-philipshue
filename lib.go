@@ -29,13 +29,11 @@ func DiscoverBridges() []Bridge {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
 	}
 
 	var bridges []Bridge
 	if err := json.Unmarshal(body, &bridges); err != nil {
 		fmt.Println(err)
-		panic(err)
 	}
 
 	return bridges
@@ -65,13 +63,11 @@ func (bridge *Bridge) CreateUser() string {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
 	}
 
 	var responses []UserResponse
 	if err := json.Unmarshal(body, &responses); err != nil {
 		fmt.Println(err)
-		panic(err)
 	}
 
 	return responses[0].Success.Username
@@ -117,13 +113,13 @@ func (bridge *Bridge) SwitchLight(params Params) {
 
 	params.ID = strconv.Itoa(id)
 
-	req, err := http.NewRequest(http.MethodPut, "http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+params.ID, bytes.NewBuffer(byteParams))
+	req, err := http.NewRequest(http.MethodPut, "http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+params.ID+"/state", bytes.NewBuffer(byteParams))
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	_, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 	}

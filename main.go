@@ -98,7 +98,7 @@ func OnStart(config []byte) {
 				continue
 			}
 			bridges[i].Username = savedConfig.Username
-			for j, light := range bridge.GetLights() {
+			for j, light := range bridges[i].GetLights() {
 				States = append(States, State{
 					Bridge:   bridges[i],
 					Device:   light,
@@ -111,11 +111,11 @@ func OnStart(config []byte) {
 
 // Params define actions parameters available
 type Params struct {
-	ID  string
-	On  bool
-	Sat int
-	Bri int
-	Hue int
+	ID  string `json:"id"`
+	On  bool   `json:"on"`
+	Sat int    `json:"sat"`
+	Bri int    `json:"bri"`
+	Hue int    `json:"hue"`
 }
 
 // CallAction call functions from actions
