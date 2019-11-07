@@ -97,34 +97,11 @@ func (bridge *Bridge) GetLights() []devices.LCT0152A19ECLv5 {
 	return lights
 }
 
-// SwitchLight send user params to the light
-func (bridge *Bridge) SwitchLight(params Params) {
-	byteParams, err := json.Marshal(params)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	id := GetLightID(params.ID)
-	if id == -1 {
-		fmt.Println("Wrong id")
-		return
-	}
-
-	params.ID = strconv.Itoa(id)
-
-	req, err := http.NewRequest(http.MethodPut, "http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+params.ID+"/state", bytes.NewBuffer(byteParams))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return
+type lightParams struct {
+	On  bool `json:"on"`
+	Sat int  `json:"sat"`
+	Bri int  `json:"bri"`
+	Hue int  `json:"hue"`
 }
 
 // GetLightID return int id of the light
@@ -145,4 +122,39 @@ func GetBridge(uid string) Bridge {
 		}
 	}
 	return Bridge{}
+}
+
+// SwitchLight send user params to the light
+func (bridge *Bridge) SwitchLight(params Params) {
+	lightReq := lightParams{
+		On:  params.On,
+		Sat: params.Sat,
+		Bri: params.Bri,
+		Hue: params.Hue,
+	}
+
+	byteParams, err := json.Marshal(lightReq)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	id := GetLightID(params.ID)
+	if id == -1 {
+		fmt.Println("Wrong id")
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPut, "http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+strconv.Itoa(id)+"/state", bytes.NewBuffer(byteParams))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
 }
