@@ -97,6 +97,25 @@ func (bridge *Bridge) GetLights() []devices.LCT0152A19ECLv5 {
 	return lights
 }
 
+// GetLight get state light from bridge
+func (bridge *Bridge) GetLight(id int) devices.LCT0152A19ECLv5 {
+	res, err := http.Get("http://" + bridge.InternalIPAddress + "/api/" + bridge.Username + "/lights/" + strconv.Itoa(id))
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var light devices.LCT0152A19ECLv5
+	json.Unmarshal(body, &light)
+
+	return light
+}
+
 type lightParams struct {
 	On  bool `json:"on"`
 	Sat int  `json:"sat"`
@@ -142,6 +161,40 @@ func (bridge *Bridge) SwitchLight(params Params) {
 	id := GetLightID(params.ID)
 	if id == -1 {
 		fmt.Println("Wrong id")
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPut, "http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+strconv.Itoa(id)+"/state", bytes.NewBuffer(byteParams))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
+}
+
+// ToggleLight get the current state light to toggle on/off
+func (bridge *Bridge) ToggleLight(params Params) {
+	id := GetLightID(params.ID)
+	if id == -1 {
+		fmt.Println("Wrong id")
+		return
+	}
+
+	light := bridge.GetLight(id)
+	on := !light.State.ON
+
+	lightReq := lightParams{
+		On: on,
+	}
+	byteParams, err := json.Marshal(lightReq)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 

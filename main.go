@@ -46,6 +46,10 @@ var Config = sdk.Configuration{
 				},
 			},
 		},
+		sdk.Action{
+			Name:   "toggleLight",
+			Fields: []sdk.Field{},
+		},
 	},
 }
 
@@ -111,11 +115,11 @@ func OnStart(config []byte) {
 
 // Params define actions parameters available
 type Params struct {
-	ID  string `json:"id"`
-	On  bool   `json:"on"`
-	Sat int    `json:"sat"`
-	Bri int    `json:"bri"`
-	Hue int    `json:"hue"`
+	ID  string
+	On  bool
+	Sat int
+	Bri int
+	Hue int
 }
 
 // CallAction call functions from actions
@@ -134,14 +138,17 @@ func CallAction(name string, params []byte, config []byte) {
 		fmt.Println(err)
 	}
 
+	bridge := GetBridge(req.ID)
+	if bridge.ID == "" {
+		return
+	}
+
 	// use name to call actions
 	switch name {
 	case "switchLight":
-		bridge := GetBridge(req.ID)
-		if bridge.ID == "" {
-			return
-		}
 		bridge.SwitchLight(req)
+	case "toggleLight":
+		bridge.ToggleLight(req)
 	default:
 		return
 	}
