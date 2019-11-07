@@ -17,9 +17,6 @@ var Config = sdk.Configuration{
 	Version:     "1.0.0",
 	Author:      "casa",
 	Description: "Control Philips Hue ecosystem",
-	Main:        "",
-	FuncData:    "",
-	Discover:    true,
 	Triggers:    []sdk.Trigger{},
 	Actions: []sdk.Action{
 		sdk.Action{
