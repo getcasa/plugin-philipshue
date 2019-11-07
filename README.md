@@ -11,5 +11,5 @@ sudo env CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build
 
 ## Install
 1. Extract `philipshue.zip`
-2. Move `philipshue.so` to casa `plugins` folder
+2. Move `philipshue.so` to casa gateway `plugins` folder
 3. Restart casa gateway
