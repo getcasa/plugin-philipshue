@@ -136,30 +136,15 @@ func GetBridge(uid string) Bridge {
 	return Bridge{}
 }
 
-// lightParams define api request parameters for light
-type lightParams struct {
-	On  bool `json:"on"`
-	Sat int  `json:"sat"`
-	Bri int  `json:"bri"`
-	Hue int  `json:"hue"`
-}
-
 // SwitchLight send user params to the light
-func (bridge *Bridge) SwitchLight(params Params) {
-	lightReq := lightParams{
-		On:  params.On,
-		Sat: params.Sat,
-		Bri: params.Bri,
-		Hue: params.Hue,
-	}
-
-	byteParams, err := json.Marshal(lightReq)
+func (bridge *Bridge) SwitchLight(physicalID string, params Params) {
+	byteParams, err := json.Marshal(params)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	id := GetLightID(params.ID)
+	id := GetLightID(physicalID)
 	if id == -1 {
 		fmt.Println("Wrong id")
 		return
@@ -180,8 +165,8 @@ func (bridge *Bridge) SwitchLight(params Params) {
 }
 
 // ToggleLight get the current state light to toggle on/off
-func (bridge *Bridge) ToggleLight(params Params) {
-	id := GetLightID(params.ID)
+func (bridge *Bridge) ToggleLight(physicalID string) {
+	id := GetLightID(physicalID)
 	if id == -1 {
 		fmt.Println("Wrong id")
 		return
@@ -190,7 +175,7 @@ func (bridge *Bridge) ToggleLight(params Params) {
 	light := bridge.GetLight(id)
 	on := !light.State.ON
 
-	lightReq := lightParams{
+	lightReq := Params{
 		On: on,
 	}
 	byteParams, err := json.Marshal(lightReq)

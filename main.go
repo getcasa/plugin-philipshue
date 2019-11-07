@@ -117,7 +117,6 @@ func OnStart(config []byte) {
 
 // Params define actions parameters available
 type Params struct {
-	ID  string
 	On  bool
 	Sat int
 	Bri int
@@ -125,7 +124,7 @@ type Params struct {
 }
 
 // CallAction call functions from actions
-func CallAction(name string, params []byte, config []byte) {
+func CallAction(physicalID string, name string, params []byte, config []byte) {
 	if string(params) == "" {
 		fmt.Println("Params must be provided")
 		return
@@ -141,7 +140,7 @@ func CallAction(name string, params []byte, config []byte) {
 	}
 
 	// get the light's bridge
-	bridge := GetBridge(req.ID)
+	bridge := GetBridge(physicalID)
 	if bridge.ID == "" {
 		return
 	}
@@ -149,9 +148,9 @@ func CallAction(name string, params []byte, config []byte) {
 	// use name to call actions
 	switch name {
 	case "switchLight":
-		bridge.SwitchLight(req)
+		bridge.SwitchLight(physicalID, req)
 	case "toggleLight":
-		bridge.ToggleLight(req)
+		bridge.ToggleLight(physicalID)
 	default:
 		return
 	}
