@@ -11,6 +11,7 @@ import (
 
 func main() {}
 
+// Config define the casa plugin configuration
 var Config = sdk.Configuration{
 	Name:        "philipshue",
 	Version:     "1.0.0",
@@ -86,7 +87,7 @@ func Init() []byte {
 	return config
 }
 
-// OnStart create http client
+// OnStart discover brdiges and create the global state
 func OnStart(config []byte) {
 	var savedConfigs []savedConfig
 
@@ -96,6 +97,7 @@ func OnStart(config []byte) {
 
 	bridges := DiscoverBridges()
 
+	// create global state to store bridges and lights
 	for _, savedConfig := range savedConfigs {
 		for i, bridge := range bridges {
 			if savedConfig.BridgeID != bridge.ID {
@@ -138,6 +140,7 @@ func CallAction(name string, params []byte, config []byte) {
 		fmt.Println(err)
 	}
 
+	// get the light's bridge
 	bridge := GetBridge(req.ID)
 	if bridge.ID == "" {
 		return

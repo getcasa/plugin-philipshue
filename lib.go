@@ -116,13 +116,6 @@ func (bridge *Bridge) GetLight(id int) devices.LCT0152A19ECLv5 {
 	return light
 }
 
-type lightParams struct {
-	On  bool `json:"on"`
-	Sat int  `json:"sat"`
-	Bri int  `json:"bri"`
-	Hue int  `json:"hue"`
-}
-
 // GetLightID return int id of the light
 func GetLightID(uid string) int {
 	for _, state := range States {
@@ -141,6 +134,14 @@ func GetBridge(uid string) Bridge {
 		}
 	}
 	return Bridge{}
+}
+
+// lightParams define api request parameters for light
+type lightParams struct {
+	On  bool `json:"on"`
+	Sat int  `json:"sat"`
+	Bri int  `json:"bri"`
+	Hue int  `json:"hue"`
 }
 
 // SwitchLight send user params to the light
