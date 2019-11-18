@@ -17,7 +17,15 @@ var Config = sdk.Configuration{
 	Version:     "1.0.0",
 	Author:      "casa",
 	Description: "Control Philips Hue ecosystem",
-	Triggers:    []sdk.Trigger{},
+	Devices: []sdk.Device{
+		sdk.Device{
+			Name:           "LCT015_2_A19ECLv5",
+			DefaultTrigger: "",
+			DefaultAction:  "",
+			Triggers:       []sdk.Trigger{},
+			Actions:        []string{"switchLight", "toggleLight"},
+		},
+	},
 	Actions: []sdk.Action{
 		sdk.Action{
 			Name: "switchLight",
