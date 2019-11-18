@@ -53,8 +53,9 @@ var Config = sdk.Configuration{
 			},
 		},
 		sdk.Action{
-			Name:   "toggleLight",
-			Fields: []sdk.Field{},
+			Name:    "toggleLight",
+			Default: true,
+			Fields:  []sdk.Field{},
 		},
 	},
 }
