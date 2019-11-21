@@ -19,9 +19,9 @@ var Config = sdk.Configuration{
 	Description: "Control Philips Hue ecosystem",
 	Devices: []sdk.Device{
 		sdk.Device{
-			Name:           "LCT015_2_A19ECLv5",
+			Name:           "Philips-LCT015-2-A19ECLv5",
 			DefaultTrigger: "",
-			DefaultAction:  "",
+			DefaultAction:  "toggleLight",
 			Triggers:       []sdk.Trigger{},
 			Actions:        []string{"switchLight", "toggleLight"},
 		},
@@ -74,26 +74,15 @@ type savedConfig struct {
 // States is the global state of plugin
 var States []State
 var client http.Client
+var configPlugin []savedConfig
 
 // Init plugin config
 func Init() []byte {
-	bridges := DiscoverBridges()
-	var savedConfigs []savedConfig
-
-	for _, bridge := range bridges {
-		savedConfigs = append(savedConfigs, savedConfig{
-			BridgeID: bridge.ID,
-			Username: bridge.CreateUser(),
-		})
-	}
-
-	config, _ := json.Marshal(savedConfigs)
-
-	return config
+	return []byte{}
 }
 
-// OnStart discover brdiges and create the global state
-func OnStart(config []byte) {
+//UpdateConfig update plugin's config if necessary
+func UpdateConfig(config []byte) []byte {
 	var savedConfigs []savedConfig
 
 	if err := json.Unmarshal(config, &savedConfigs); err != nil {
@@ -102,19 +91,91 @@ func OnStart(config []byte) {
 
 	bridges := DiscoverBridges()
 
+	for _, bridge := range bridges {
+		indexBridge := findBridgeFromID(savedConfigs, bridge.ID)
+		if indexBridge < 0 {
+			savedConfigs = append(savedConfigs, savedConfig{
+				BridgeID: bridge.ID,
+				Username: bridge.CreateUser(),
+			})
+			continue
+		} else {
+			if savedConfigs[indexBridge].Username == "" {
+				username := bridge.CreateUser()
+				savedConfigs[indexBridge].Username = username
+			}
+		}
+	}
+	configPlugin = savedConfigs
+
+	marshalConfig, _ := json.Marshal(savedConfigs)
+
+	return marshalConfig
+}
+
+func findBridgeFromID(config []savedConfig, ID string) int {
+	for ind, conf := range config {
+		if conf.BridgeID == ID {
+			return ind
+		}
+	}
+	return -1
+}
+
+// OnStart discover brdiges and create the global state
+func OnStart(config []byte) {
+	if err := json.Unmarshal(config, &configPlugin); err != nil {
+		panic(err)
+	}
+
+	discover()
+}
+
+func findStateFromID(arrayStates []State, ID string) bool {
+	for _, state := range arrayStates {
+		if state.Device.UniqueID == ID {
+			return true
+		}
+	}
+	return false
+}
+
+// Discover return array of all found devices
+func Discover() []sdk.DiscoveredDevice {
+	var discovered []sdk.DiscoveredDevice
+
+	discover()
+
+	for _, state := range States {
+		discovered = append(discovered, sdk.DiscoveredDevice{
+			Name:         state.Device.Name,
+			PhysicalID:   state.Device.UniqueID,
+			PhysicalName: state.Device.ProductID, // strings.ToLower(reflect.TypeOf(state.Device).Name()),
+			Plugin:       Config.Name,
+		})
+	}
+
+	return discovered
+}
+
+func discover() {
+	bridges := DiscoverBridges()
+
 	// create global state to store bridges and lights
-	for _, savedConfig := range savedConfigs {
+	for _, savedConfig := range configPlugin {
 		for i, bridge := range bridges {
 			if savedConfig.BridgeID != bridge.ID {
 				continue
 			}
 			bridges[i].Username = savedConfig.Username
 			for j, light := range bridges[i].GetLights() {
-				States = append(States, State{
-					Bridge:   bridges[i],
-					Device:   light,
-					DeviceID: j + 1,
-				})
+				if !findStateFromID(States, light.UniqueID) {
+					States = append(States, State{
+						Bridge:   bridges[i],
+						Device:   light,
+						DeviceID: j + 1,
+					})
+				}
 			}
 		}
 	}
@@ -132,8 +193,9 @@ type Params struct {
 func CallAction(physicalID string, name string, params []byte, config []byte) {
 	if string(params) == "" {
 		fmt.Println("Params must be provided")
-		return
 	}
+
+	fmt.Println("CallAction PHILLIPS HUE")
 
 	// declare parameters
 	var req Params
@@ -143,12 +205,17 @@ func CallAction(physicalID string, name string, params []byte, config []byte) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(req)
 
 	// get the light's bridge
 	bridge := GetBridge(physicalID)
 	if bridge.ID == "" {
 		return
 	}
+
+	fmt.Println(bridge)
+	fmt.Println(physicalID)
+	fmt.Println("BEFORE ACTION")
 
 	// use name to call actions
 	switch name {
