@@ -183,10 +183,10 @@ func discover() {
 
 // Params define actions parameters available
 type Params struct {
-	On  bool
-	Sat int
-	Bri int
-	Hue int
+	On  bool `json:"on"`
+	Sat int  `json:"sat"`
+	Bri int  `json:"bri"`
+	Hue int  `json:"hue"`
 }
 
 // CallAction call functions from actions
@@ -205,17 +205,12 @@ func CallAction(physicalID string, name string, params []byte, config []byte) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(req)
 
 	// get the light's bridge
 	bridge := GetBridge(physicalID)
 	if bridge.ID == "" {
 		return
 	}
-
-	fmt.Println(bridge)
-	fmt.Println(physicalID)
-	fmt.Println("BEFORE ACTION")
 
 	// use name to call actions
 	switch name {

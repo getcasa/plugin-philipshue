@@ -176,7 +176,10 @@ func (bridge *Bridge) ToggleLight(physicalID string) {
 	on := !light.State.ON
 
 	lightReq := Params{
-		On: on,
+		On:  on,
+		Sat: light.State.Sat,
+		Bri: light.State.Bri,
+		Hue: light.State.Hue,
 	}
 	byteParams, err := json.Marshal(lightReq)
 	if err != nil {
@@ -188,6 +191,7 @@ func (bridge *Bridge) ToggleLight(physicalID string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println("http://"+bridge.InternalIPAddress+"/api/"+bridge.Username+"/lights/"+strconv.Itoa(id)+"/state", bytes.NewBuffer(byteParams))
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	_, err = client.Do(req)
