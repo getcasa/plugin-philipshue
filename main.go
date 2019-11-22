@@ -17,6 +17,7 @@ var Config = sdk.Configuration{
 	Version:     "1.0.0",
 	Author:      "casa",
 	Description: "Control Philips Hue ecosystem",
+	Discover:    true,
 	Devices: []sdk.Device{
 		sdk.Device{
 			Name:           "Philips-LCT015-2-A19ECLv5",
@@ -194,8 +195,6 @@ func CallAction(physicalID string, name string, params []byte, config []byte) {
 	if string(params) == "" {
 		fmt.Println("Params must be provided")
 	}
-
-	fmt.Println("CallAction PHILLIPS HUE")
 
 	// declare parameters
 	var req Params
