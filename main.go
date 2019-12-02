@@ -79,7 +79,7 @@ var configPlugin []savedConfig
 
 // Init plugin config
 func Init() []byte {
-	return []byte{}
+	return []byte("{}")
 }
 
 //UpdateConfig update plugin's config if necessary
