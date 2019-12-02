@@ -79,7 +79,8 @@ var configPlugin []savedConfig
 
 // Init plugin config
 func Init() []byte {
-	return []byte("{}")
+	res, _ := json.Marshal([]savedConfig{})
+	return res
 }
 
 //UpdateConfig update plugin's config if necessary
