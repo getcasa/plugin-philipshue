@@ -26,6 +26,13 @@ var Config = sdk.Configuration{
 			Triggers:       []sdk.Trigger{},
 			Actions:        []string{"switchLight", "toggleLight"},
 		},
+		sdk.Device{
+			Name:           "Philips-LCA001-5-A19ECLv6",
+			DefaultTrigger: "",
+			DefaultAction:  "toggleLight",
+			Triggers:       []sdk.Trigger{},
+			Actions:        []string{"switchLight", "toggleLight"},
+		},
 	},
 	Actions: []sdk.Action{
 		sdk.Action{
