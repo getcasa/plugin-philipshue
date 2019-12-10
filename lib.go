@@ -74,7 +74,7 @@ func (bridge *Bridge) CreateUser() string {
 }
 
 // GetLights list all lights from bridge
-func (bridge *Bridge) GetLights() []devices.LCT0152A19ECLv5 {
+func (bridge *Bridge) GetLights() []devices.Hue {
 	res, err := http.Get("http://" + bridge.InternalIPAddress + "/api/" + bridge.Username + "/lights")
 	if err != nil {
 		fmt.Println(err)
@@ -86,19 +86,20 @@ func (bridge *Bridge) GetLights() []devices.LCT0152A19ECLv5 {
 		fmt.Println(err)
 	}
 
-	var result map[string]devices.LCT0152A19ECLv5
+	var result map[string]devices.Hue
 	json.Unmarshal([]byte(body), &result)
 
-	var lights []devices.LCT0152A19ECLv5
-	for i := 1; result[strconv.Itoa(i)].Name != ""; i++ {
-		lights = append(lights, result[strconv.Itoa(i)])
+	var lights []devices.Hue
+	for i := 1; i <= 50; i++ {
+		if result[strconv.Itoa(i)].Name != "" {
+			lights = append(lights, result[strconv.Itoa(i)])
+		}
 	}
-
 	return lights
 }
 
 // GetLight get state light from bridge
-func (bridge *Bridge) GetLight(id int) devices.LCT0152A19ECLv5 {
+func (bridge *Bridge) GetLight(id int) devices.Hue {
 	res, err := http.Get("http://" + bridge.InternalIPAddress + "/api/" + bridge.Username + "/lights/" + strconv.Itoa(id))
 	if err != nil {
 		fmt.Println(err)
@@ -110,7 +111,7 @@ func (bridge *Bridge) GetLight(id int) devices.LCT0152A19ECLv5 {
 		fmt.Println(err)
 	}
 
-	var light devices.LCT0152A19ECLv5
+	var light devices.Hue
 	json.Unmarshal(body, &light)
 
 	return light

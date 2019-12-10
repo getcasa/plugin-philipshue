@@ -48,8 +48,8 @@ type config struct {
 	Direction string
 }
 
-// LCT0152A19ECLv5 define a philips hue light bulb
-type LCT0152A19ECLv5 struct {
+// Hue define a philips hue light bulb
+type Hue struct {
 	State            state
 	SWUpdate         swUpdate
 	Type             string

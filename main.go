@@ -20,14 +20,21 @@ var Config = sdk.Configuration{
 	Discover:    true,
 	Devices: []sdk.Device{
 		sdk.Device{
-			Name:           "Philips-LCT015-2-A19ECLv5",
+			Name:           "LCT015",
 			DefaultTrigger: "",
 			DefaultAction:  "toggleLight",
 			Triggers:       []sdk.Trigger{},
 			Actions:        []string{"switchLight", "toggleLight"},
 		},
 		sdk.Device{
-			Name:           "Philips-LCA001-5-A19ECLv6",
+			Name:           "LCA001",
+			DefaultTrigger: "",
+			DefaultAction:  "toggleLight",
+			Triggers:       []sdk.Trigger{},
+			Actions:        []string{"switchLight", "toggleLight"},
+		},
+		sdk.Device{
+			Name:           "LCT024",
 			DefaultTrigger: "",
 			DefaultAction:  "toggleLight",
 			Triggers:       []sdk.Trigger{},
@@ -70,7 +77,7 @@ var Config = sdk.Configuration{
 // State define each element of the global state
 type State struct {
 	Bridge   Bridge
-	Device   devices.LCT0152A19ECLv5
+	Device   devices.Hue
 	DeviceID int
 }
 
@@ -156,10 +163,11 @@ func Discover() []sdk.DiscoveredDevice {
 	discover()
 
 	for _, state := range States {
+		fmt.Println(state.Device.ModelID)
 		discovered = append(discovered, sdk.DiscoveredDevice{
 			Name:         state.Device.Name,
 			PhysicalID:   state.Device.UniqueID,
-			PhysicalName: state.Device.ProductID, // strings.ToLower(reflect.TypeOf(state.Device).Name()),
+			PhysicalName: state.Device.ModelID, // strings.ToLower(reflect.TypeOf(state.Device).Name()),
 			Plugin:       Config.Name,
 		})
 	}
